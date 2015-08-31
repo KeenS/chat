@@ -1,0 +1,13 @@
+[package]
+name = "chat"
+version = "0.1.0"
+authors = ["Sunrim KIM (keen) <3han5chou7@gmail.com>"]
+
+[dependencies]
+http-muncher = "0.2.0"
+rustc-serialize = "0.3.15"
+sha1 = "0.1.1"
+byteorder = "0.3.11"
+
+[dependencies.mio]
+git = "https://github.com/carllerche/mio"
