@@ -3,7 +3,7 @@ extern crate chat;
 
 use mio::*;
 use mio::tcp::*;
-use chat::server::WebSocketServer;
+use chat::handler::WebSocktHandler;
 
 fn main() {
     let mut event_loop = EventLoop::new().unwrap();
@@ -11,7 +11,7 @@ fn main() {
     let address = std::str::FromStr::from_str("0.0.0.0:10000").unwrap();
     server_socket.bind(&address).unwrap();
     let listener = server_socket.listen(128).unwrap();
-    let mut server = WebSocketServer::new(listener);
+    let mut server = WebSocktHandler::new(listener);
     event_loop.register_opt(&server.socket,
                             Token(0),
                             EventSet::readable(),
