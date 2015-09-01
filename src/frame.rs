@@ -3,6 +3,7 @@ extern crate byteorder;
 use self::byteorder::{ByteOrder, BigEndian};
 use std::vec::Vec;
 
+#[derive(Debug)]
 pub enum Opcode {
     Cont,
     Text,

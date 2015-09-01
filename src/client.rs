@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::fmt;
+use super::frame;
 
 fn gen_key(key: &String) -> String {
     let mut m = sha1::Sha1::new();
@@ -56,12 +57,12 @@ pub struct WebSocketClient {
     state: ClientState
 }
 
+#[derive(Debug)]
 enum ClientState {
     AwaitingHandshake,
     HandshakeResponse,
     Connected
 }
-
 
 impl WebSocketClient {
     pub fn new(socket: TcpStream) -> WebSocketClient {
@@ -88,12 +89,29 @@ impl WebSocketClient {
                 },
                 Ok(None) => break,
                 Ok(Some(len)) => {
-                    self.http_parser.parse(&buf[0..len]);
-                    if self.http_parser.is_upgrade() {
-                        self.state = ClientState::HandshakeResponse;
-                        self.interest.remove(EventSet::readable());
-                        self.interest.insert(EventSet::writable());
-                        break;
+                    println!("{:?}", &buf[0..]);
+                    println!("{:?}", self.state);
+                    match self.state {
+                        ClientState::AwaitingHandshake => {
+                            self.http_parser.parse(&buf[0..len]);
+                            if self.http_parser.is_upgrade() {
+                                self.state = ClientState::HandshakeResponse;
+                                self.interest.remove(EventSet::readable());
+                                self.interest.insert(EventSet::writable());
+                                break;
+                            }
+                        },
+                        ClientState::Connected => {
+                            let (opcode, msg) = frame::parse_frame(&buf[0..len]).unwrap();
+                            println!("{:?}", opcode);
+                            match opcode {
+                                frame::Opcode::Text => println!("{}", std::str::from_utf8(& msg[0..]).unwrap().to_string()),
+                                frame::Opcode::Binary => println!("{:?}", msg),
+                                _ => ()
+                            }
+                            break;
+                        },
+                        _  => break
                     }
                 }
             }
